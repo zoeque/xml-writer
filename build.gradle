@@ -1,0 +1,69 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.1.0'
+	id 'io.spring.dependency-management' version '1.1.0'
+	id 'java-library'
+	id 'maven-publish'
+}
+
+group = 'zoeque.xmlparser'
+version = '1.0.0'
+
+java {
+	sourceCompatibility = '17'
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+bootJar {
+	// disable not to boot
+	enabled = false
+}
+jar {
+	enabled = true
+}
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	implementation 'javax.xml.parsers:jaxp-api:1.4.5'
+	implementation 'org.w3c:dom:2.3.0-jaxb-1.0.6'
+
+	compileOnly 'org.projectlombok:lombok:1.18.30'
+	annotationProcessor 'org.projectlombok:lombok:1.18.30'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	runtimeOnly 'com.h2database:h2:2.2.220'
+	implementation 'io.vavr:vavr:0.10.3'
+	implementation 'com.google.apis:google-api-services-gmail:v1-rev110-1.25.0'
+}
+
+publishing {
+	repositories {
+		maven {
+			name = 'github-publish'
+			url = uri('https://maven.pkg.github.com/zoeque/xmlParser')
+			credentials {
+				username = project.hasProperty("GITHUB_USERNAME") ? GITHUB_USERNAME : ''
+				password = project.hasProperty("GITHUB_TOKEN") ? GITHUB_TOKEN : ''
+			}
+		}
+	}
+	publications {
+		gpr(MavenPublication) {
+			artifactId = 'xml-parser'
+			from(components.java)
+		}
+	}
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
