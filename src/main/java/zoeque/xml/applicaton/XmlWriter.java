@@ -36,8 +36,8 @@ public class XmlWriter {
 
   public void write() throws XmlWriterException {
     try {
-      DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-      DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+      var dbFactory = DocumentBuilderFactory.newInstance();
+      var dBuilder = dbFactory.newDocumentBuilder();
       Document doc = dBuilder.newDocument();
 
       Class<?> modelClass = _model.getClass();
