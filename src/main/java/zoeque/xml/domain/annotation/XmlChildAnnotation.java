@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
  * The child element annotation
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
+@Target(ElementType.FIELD)
 public @interface XmlChildAnnotation {
   String name();
 }
