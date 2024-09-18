@@ -2,11 +2,13 @@ package zoeque.xml.application;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.nio.file.Path;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -19,8 +21,8 @@ import static org.mockito.Mockito.when;
 
 public class XmlWriterTest {
 
-  @Rule
-  public TemporaryFolder folder = new TemporaryFolder();
+  @TempDir
+  public Path tempFolder;
 
   @Mock
   private AbstractXmlModel model;
@@ -31,7 +33,7 @@ public class XmlWriterTest {
   @BeforeEach
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
-    file = folder.newFile("test.xml");
+    file = tempFolder.resolve("test.xml").toFile();
     xmlWriter = new XmlWriter(model, file);
   }
 
