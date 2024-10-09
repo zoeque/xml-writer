@@ -1,4 +1,4 @@
-# XML parser
+# XML writer
 ## Overview
 
 ## Usage

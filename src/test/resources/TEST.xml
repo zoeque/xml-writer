@@ -1,4 +1,0 @@
-<test>
-    <property key = "test1" value = "foo" />
-    <property key = "test2" value = "bar" />
-</test>

@@ -68,5 +68,4 @@ publishing {
 
 tasks.named('test') {
 	useJUnitPlatform()
-	include '**/*Test.class'
 }
