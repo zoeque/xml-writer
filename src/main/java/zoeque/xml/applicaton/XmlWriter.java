@@ -21,54 +21,38 @@ import zoeque.xml.domain.model.AbstractXmlModel;
  */
 @Slf4j
 public class XmlWriter {
-  private AbstractXmlModel _model;
-  private File _file;
-
   /**
    * Constructor
-   *
-   * @param model The xml model with full value set
    */
-  public XmlWriter(AbstractXmlModel model, File xmlFile) {
-    this._model = model;
-    this._file = xmlFile;
+  public XmlWriter() {
   }
 
-  public void write() throws XmlWriterException {
-    try {
-      var dbFactory = DocumentBuilderFactory.newInstance();
-      var dBuilder = dbFactory.newDocumentBuilder();
-      Document doc = dBuilder.newDocument();
+  public String write(AbstractXmlModel model) throws IllegalAccessException {
+    StringBuilder xmlBuilder = new StringBuilder();
 
-      Class<?> modelClass = _model.getClass();
-      if (modelClass.isAnnotationPresent(XmlRootAnnotation.class)) {
-        XmlRootAnnotation rootAnnotation = modelClass.getAnnotation(XmlRootAnnotation.class);
-        Element rootElement = doc.createElement(rootAnnotation.name());
-        doc.appendChild(rootElement);
+    // クラスのアノテーションを取得
+    Class<?> clazz = model.getClass();
+    XmlRootAnnotation rootAnnotation = clazz.getAnnotation(XmlRootAnnotation.class);
 
-        Field[] fields = modelClass.getDeclaredFields();
-        for (Field field : fields) {
-          if (field.isAnnotationPresent(XmlChildAnnotation.class)) {
-            XmlChildAnnotation childAnnotation = field.getAnnotation(XmlChildAnnotation.class);
-            field.setAccessible(true);
-            String value = (String) field.get(_model);
-            Element childElement = doc.createElement(childAnnotation.name());
-            childElement.appendChild(doc.createTextNode(value));
-            rootElement.appendChild(childElement);
-          }
+    if (rootAnnotation != null) {
+      xmlBuilder.append("<").append(rootAnnotation.name()).append(">\n");
+
+      // フィールドを取得
+      Field[] fields = clazz.getDeclaredFields();
+      for (Field field : fields) {
+        XmlChildAnnotation childAnnotation = field.getAnnotation(XmlChildAnnotation.class);
+        if (childAnnotation != null) {
+          field.setAccessible(true);
+          Object value = field.get(model);
+          xmlBuilder.append("  <").append(childAnnotation.name()).append(">");
+          xmlBuilder.append(value != null ? value.toString() : "");
+          xmlBuilder.append("</").append(childAnnotation.name()).append(">\n");
         }
-
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        Transformer transformer = transformerFactory.newTransformer();
-        DOMSource source = new DOMSource(doc);
-        StreamResult result = new StreamResult(_file);
-
-        transformer.transform(source, result);
-      } else {
-        log.warn("Class does not have XmlRootAnnotation.");
       }
-    } catch (Exception e) {
-      throw new XmlWriterException(e);
+
+      xmlBuilder.append("</").append(rootAnnotation.name()).append(">");
     }
+
+    return xmlBuilder.toString();
   }
 }

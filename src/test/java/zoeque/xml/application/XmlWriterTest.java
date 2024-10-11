@@ -1,62 +1,59 @@
 package zoeque.xml.application;
 
-import java.io.File;
-import java.lang.reflect.Field;
-import java.nio.file.Path;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.rules.TemporaryFolder;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import zoeque.xml.applicaton.XmlWriter;
+import zoeque.xml.domain.annotation.XmlChildAnnotation;
+import zoeque.xml.domain.annotation.XmlRootAnnotation;
 import zoeque.xml.domain.model.AbstractXmlModel;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class XmlWriterTest {
 
-  @TempDir
-  public Path tempFolder;
+  @XmlRootAnnotation(name = "Person")
+  static class TestPerson extends AbstractXmlModel {
+    @XmlChildAnnotation(name = "Name")
+    private String name;
 
-  @Mock
-  private AbstractXmlModel model;
+    @XmlChildAnnotation(name = "Age")
+    private int age;
 
-  private File file;
-  private XmlWriter xmlWriter;
-
-  @BeforeEach
-  public void setUp() throws Exception {
-    MockitoAnnotations.initMocks(this);
-    file = tempFolder.resolve("test.xml").toFile();
-    xmlWriter = new XmlWriter(model, file);
+    public TestPerson(String name, int age) {
+      this.name = name;
+      this.age = age;
+    }
   }
 
+  @Test
+  public void testWritePerson() throws IllegalAccessException {
+    // Arrange
+    TestPerson person = new TestPerson("Alice", 30);
+    XmlWriter xmlWriter = new XmlWriter();
+
+    // Act
+    String xmlOutput = xmlWriter.write(person);
+
+    // Assert
+    String expectedXml = "<Person>\n" +
+            "  <Name>Alice</Name>\n" +
+            "  <Age>30</Age>\n" +
+            "</Person>";
+    assertEquals(expectedXml, xmlOutput);
+  }
 
   @Test
-  public void testWrite() throws Exception {
-    // Mock settings
-    Field field = TestModel.class.getDeclaredField("childField");
-    field.setAccessible(true);
-    when(field.get(model)).thenReturn("childValue");
+  public void testWritePersonWithNullValues() throws IllegalAccessException {
+    // Arrange
+    TestPerson person = new TestPerson(null, 0);
+    XmlWriter xmlWriter = new XmlWriter();
 
-    // write XML file
-    xmlWriter.write();
+    // Act
+    String xmlOutput = xmlWriter.write(person);
 
-    // result
-    DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-    DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-    Document doc = dBuilder.parse(file);
-
-    Element rootElement = doc.getDocumentElement();
-    assertEquals("root", rootElement.getNodeName());
-
-    Element childElement = (Element) rootElement.getElementsByTagName("child").item(0);
-    assertEquals("childValue", childElement.getTextContent());
+    // Assert
+    String expectedXml = "<Person>\n" +
+            "  <Name></Name>\n" +
+            "  <Age>0</Age>\n" +
+            "</Person>";
+    assertEquals(expectedXml, xmlOutput);
   }
 }
