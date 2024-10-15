@@ -1,59 +1,82 @@
 package zoeque.xml.application;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import zoeque.xml.applicaton.XmlWriter;
 import zoeque.xml.domain.annotation.XmlChildAnnotation;
-import zoeque.xml.domain.annotation.XmlRootAnnotation;
 import zoeque.xml.domain.model.AbstractXmlModel;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class XmlWriterTest {
+class XmlWriterTest {
 
-  @XmlRootAnnotation(name = "Person")
-  static class TestPerson extends AbstractXmlModel {
-    @XmlChildAnnotation(name = "Name")
-    private String name;
+  @InjectMocks
+  private XmlWriter xmlWriter;
 
-    @XmlChildAnnotation(name = "Age")
-    private int age;
+  @BeforeEach
+  void setUp() {
+    MockitoAnnotations.openMocks(this);
+    xmlWriter = new XmlWriter("test.xml");
+  }
 
-    public TestPerson(String name, int age) {
-      this.name = name;
-      this.age = age;
+  @Test
+  void testWrite_Success() throws IllegalAccessException, IOException {
+    // テスト用モデル
+    TestModel model = new TestModel();
+    model.setField1("value1");
+    model.setField2("value2");
+
+    // XMLを書き込む
+    xmlWriter.write(model);
+
+    // 書き込まれたファイルの確認
+    Path path = Paths.get("test.xml");
+    String content = Files.readString(path);
+    String expectedXml = "<TestModel>\n" +
+            "  <field1>value1</field1>\n" +
+            "  <field2>value2</field2>\n" +
+            "</TestModel>";
+
+    assertEquals(expectedXml, content.trim());
+
+    // テスト後にファイルを削除
+    Files.deleteIfExists(path);
+  }
+
+  @Test
+  void testWrite_ThrowsIOException() {
+    // モックファイルパスを設定
+    xmlWriter = new XmlWriter("invalid/path/to/file.xml");
+
+    // モデルの準備
+    TestModel model = new TestModel();
+
+    // IOExceptionが発生することを確認
+    assertThrows(IOException.class, () -> xmlWriter.write(model));
+  }
+
+  // テスト用モデルクラス
+  static class TestModel extends AbstractXmlModel {
+    @XmlChildAnnotation(name = "field1")
+    private String field1;
+
+    @XmlChildAnnotation(name = "field2")
+    private String field2;
+
+    public void setField1(String field1) {
+      this.field1 = field1;
     }
-  }
 
-  @Test
-  public void testWritePerson() throws IllegalAccessException {
-    // Arrange
-    TestPerson person = new TestPerson("Alice", 30);
-    XmlWriter xmlWriter = new XmlWriter();
-
-    // Act
-    String xmlOutput = xmlWriter.write(person);
-
-    // Assert
-    String expectedXml = "<Person>\n" +
-            "  <Name>Alice</Name>\n" +
-            "  <Age>30</Age>\n" +
-            "</Person>";
-    assertEquals(expectedXml, xmlOutput);
-  }
-
-  @Test
-  public void testWritePersonWithNullValues() throws IllegalAccessException {
-    // Arrange
-    TestPerson person = new TestPerson(null, 0);
-    XmlWriter xmlWriter = new XmlWriter();
-
-    // Act
-    String xmlOutput = xmlWriter.write(person);
-
-    // Assert
-    String expectedXml = "<Person>\n" +
-            "  <Name></Name>\n" +
-            "  <Age>0</Age>\n" +
-            "</Person>";
-    assertEquals(expectedXml, xmlOutput);
+    public void setField2(String field2) {
+      this.field2 = field2;
+    }
   }
 }

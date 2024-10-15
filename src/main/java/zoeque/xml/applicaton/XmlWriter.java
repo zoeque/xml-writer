@@ -1,19 +1,13 @@
 package zoeque.xml.applicaton;
 
-import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import lombok.extern.slf4j.Slf4j;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import zoeque.xml.domain.annotation.XmlChildAnnotation;
 import zoeque.xml.domain.annotation.XmlRootAnnotation;
-import zoeque.xml.domain.exception.XmlWriterException;
 import zoeque.xml.domain.model.AbstractXmlModel;
 
 /**
@@ -21,13 +15,17 @@ import zoeque.xml.domain.model.AbstractXmlModel;
  */
 @Slf4j
 public class XmlWriter {
+
+  String filePath;
+
   /**
    * Constructor
    */
-  public XmlWriter() {
+  public XmlWriter(String filePath) {
+    this.filePath = filePath;
   }
 
-  public String write(AbstractXmlModel model) throws IllegalAccessException {
+  public void write(AbstractXmlModel model) throws IllegalAccessException, IOException {
     StringBuilder xmlBuilder = new StringBuilder();
 
     // クラスのアノテーションを取得
@@ -53,6 +51,9 @@ public class XmlWriter {
       xmlBuilder.append("</").append(rootAnnotation.name()).append(">");
     }
 
-    return xmlBuilder.toString();
+    // XMLをファイルに書き込む
+    Path path = Paths.get(filePath);
+    Files.write(path, xmlBuilder.toString().getBytes());
+    log.info("XML has been written to {}", filePath);
   }
 }
