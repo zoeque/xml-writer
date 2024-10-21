@@ -1,5 +1,6 @@
 package zoeque.xml.application;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -12,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import zoeque.xml.applicaton.XmlWriter;
 import zoeque.xml.domain.annotation.XmlChildAnnotation;
+import zoeque.xml.domain.annotation.XmlRootAnnotation;
 import zoeque.xml.domain.model.AbstractXmlModel;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -21,10 +23,20 @@ class XmlWriterTest {
   @InjectMocks
   private XmlWriter xmlWriter;
 
+  private Path tempFilePath;  // 一時ファイルパス
+
   @BeforeEach
-  void setUp() {
+  void setUp() throws IOException {
     MockitoAnnotations.openMocks(this);
-    xmlWriter = new XmlWriter("test.xml");
+    // 一時ファイルを作成
+    tempFilePath = Files.createTempFile("test", ".xml");
+    xmlWriter = new XmlWriter(tempFilePath.toString());
+  }
+
+  @AfterEach
+  void tearDown() throws IOException {
+    // テスト後に一時ファイルを削除
+    Files.deleteIfExists(tempFilePath);
   }
 
   @Test
@@ -38,23 +50,19 @@ class XmlWriterTest {
     xmlWriter.write(model);
 
     // 書き込まれたファイルの確認
-    Path path = Paths.get("test.xml");
-    String content = Files.readString(path);
+    String content = Files.readString(tempFilePath);
     String expectedXml = "<TestModel>\n" +
             "  <field1>value1</field1>\n" +
             "  <field2>value2</field2>\n" +
             "</TestModel>";
 
     assertEquals(expectedXml, content.trim());
-
-    // テスト後にファイルを削除
-    Files.deleteIfExists(path);
   }
 
   @Test
   void testWrite_ThrowsIOException() {
-    // モックファイルパスを設定
-    xmlWriter = new XmlWriter("invalid/path/to/file.xml");
+    // モックファイルパスを設定（無効なパスを使うことで例外を発生させる）
+    xmlWriter = new XmlWriter("/invalid/path/test.xml");
 
     // モデルの準備
     TestModel model = new TestModel();
@@ -64,6 +72,7 @@ class XmlWriterTest {
   }
 
   // テスト用モデルクラス
+  @XmlRootAnnotation(name = "TestModel")
   static class TestModel extends AbstractXmlModel {
     @XmlChildAnnotation(name = "field1")
     private String field1;
