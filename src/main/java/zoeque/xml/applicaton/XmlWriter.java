@@ -25,17 +25,23 @@ public class XmlWriter {
     this.filePath = filePath;
   }
 
+  /**
+   * Write xml file to given file path
+   *
+   * @param model
+   * @throws IllegalAccessException
+   * @throws IOException
+   */
   public void write(AbstractXmlModel model) throws IllegalAccessException, IOException {
     StringBuilder xmlBuilder = new StringBuilder();
 
-    // クラスのアノテーションを取得
+    // Get class annotation
     Class<?> clazz = model.getClass();
     XmlRootAnnotation rootAnnotation = clazz.getAnnotation(XmlRootAnnotation.class);
 
     if (rootAnnotation != null) {
       xmlBuilder.append("<").append(rootAnnotation.name()).append(">\n");
 
-      // フィールドを取得
       Field[] fields = clazz.getDeclaredFields();
       for (Field field : fields) {
         XmlChildAnnotation childAnnotation = field.getAnnotation(XmlChildAnnotation.class);
@@ -51,7 +57,7 @@ public class XmlWriter {
       xmlBuilder.append("</").append(rootAnnotation.name()).append(">");
     }
 
-    // XMLをファイルに書き込む
+    // write XML file
     Path path = Paths.get(filePath);
     Files.write(path, xmlBuilder.toString().getBytes());
     log.info("XML has been written to {}", filePath);

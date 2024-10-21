@@ -28,28 +28,28 @@ class XmlWriterTest {
   @BeforeEach
   void setUp() throws IOException {
     MockitoAnnotations.openMocks(this);
-    // 一時ファイルを作成
+    // create temporary file
     tempFilePath = Files.createTempFile("test", ".xml");
     xmlWriter = new XmlWriter(tempFilePath.toString());
   }
 
   @AfterEach
-  void tearDown() throws IOException {
-    // テスト後に一時ファイルを削除
+  void deleteTemporaryFile() throws IOException {
+    // delete temporary file
     Files.deleteIfExists(tempFilePath);
   }
 
   @Test
   void testWrite_Success() throws IllegalAccessException, IOException {
-    // テスト用モデル
+    // Create temporary model class
     TestModel model = new TestModel();
     model.setField1("value1");
     model.setField2("value2");
 
-    // XMLを書き込む
+    // write xml file
     xmlWriter.write(model);
 
-    // 書き込まれたファイルの確認
+    // assert expected xml model
     String content = Files.readString(tempFilePath);
     String expectedXml = "<TestModel>\n" +
             "  <field1>value1</field1>\n" +
@@ -61,17 +61,19 @@ class XmlWriterTest {
 
   @Test
   void testWrite_ThrowsIOException() {
-    // モックファイルパスを設定（無効なパスを使うことで例外を発生させる）
+    // create mock path that does not exist
     xmlWriter = new XmlWriter("/invalid/path/test.xml");
 
-    // モデルの準備
+    // create model, need not set value
     TestModel model = new TestModel();
 
-    // IOExceptionが発生することを確認
+    // IOException
     assertThrows(IOException.class, () -> xmlWriter.write(model));
   }
 
-  // テスト用モデルクラス
+  /**
+   * The test class
+   */
   @XmlRootAnnotation(name = "TestModel")
   static class TestModel extends AbstractXmlModel {
     @XmlChildAnnotation(name = "field1")
