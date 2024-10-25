@@ -30,6 +30,14 @@ Below is a sample XML model.
   }
 ```
 
+XmlWriter class exports this model to xml below;
+```xml
+<TestModel>
+    <field1>value1</field1>
+    <field2>value2</field2>
+</TestModel>
+```
+
 ## Development
 This application is built with the environment bellow;
 
