@@ -2,7 +2,33 @@
 ## Overview
 
 ## Usage
-TBD
+When used, first create an instance of the XmlWriter class and specify the output file as the argument.
+The specified file path can be checked using the getFilePath() method.  
+
+Create a class that extends AbstractXmlModel according to the XML format you wish to output.  
+The class inherits from AbstractXmlModel and is given XmlRootAnnotation as a class annotation. This annotation can be set to a `name` and the specified value will be set as an attribute of the XML.
+
+XmlChildAnnotation is given to the field as a child element of XML. This annotation can be set to a `name` as well. The value set for the field can be set as the value of the element.
+
+Below is a sample XML model.
+```java
+  @XmlRootAnnotation(name = "TestModel")
+  static class TestModel extends AbstractXmlModel {
+    @XmlChildAnnotation(name = "field1")
+    private String field1;
+
+    @XmlChildAnnotation(name = "field2")
+    private String field2;
+
+    public void setField1(String field1) {
+      this.field1 = field1;
+    }
+
+    public void setField2(String field2) {
+      this.field2 = field2;
+    }
+  }
+```
 
 ## Development
 This application is built with the environment bellow;

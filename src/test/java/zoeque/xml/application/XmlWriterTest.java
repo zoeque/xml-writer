@@ -1,19 +1,17 @@
 package zoeque.xml.application;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import zoeque.xml.applicaton.XmlWriter;
 import zoeque.xml.domain.annotation.XmlChildAnnotation;
 import zoeque.xml.domain.annotation.XmlRootAnnotation;
+import zoeque.xml.domain.exception.XmlWriterException;
 import zoeque.xml.domain.model.AbstractXmlModel;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -40,7 +38,7 @@ class XmlWriterTest {
   }
 
   @Test
-  void testWrite_Success() throws IllegalAccessException, IOException {
+  void testWrite_Success() throws XmlWriterException, IOException, IllegalAccessException {
     // Create temporary model class
     TestModel model = new TestModel();
     model.setField1("value1");
@@ -68,7 +66,7 @@ class XmlWriterTest {
     TestModel model = new TestModel();
 
     // IOException
-    assertThrows(IOException.class, () -> xmlWriter.write(model));
+    assertThrows(XmlWriterException.class, () -> xmlWriter.write(model));
   }
 
   /**
